@@ -114,6 +114,7 @@ body {
 .nav-btn.active { color: var(--primary); }
 .nav-btn:active { transform: scale(0.95); }
 .nav-icon { font-size: 1.25rem; line-height: 1; }
+#install-btn .nav-icon { font-size: 1rem; }
 
 /* ===== VIEWS ===== */
 .view { display: none; padding: 0 0 16px 0; animation: fadeIn 0.2s ease; }

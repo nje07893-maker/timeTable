@@ -84,6 +84,8 @@ const App = {
       if (e.target === e.currentTarget) this.closeModal();
     });
 
+    this._initInstall();
+
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') { this.closeModal(); }
       if (e.key >= '1' && e.key <= '5') {
@@ -432,6 +434,33 @@ const App = {
     if (!await showConfirm('Reset Data', 'Delete all entries and restore demo data?')) return;
     Timetable.reset(); this.renderHome(); this.renderWeekGrid();
     showToast('Reset', 'Demo data restored', 'info');
+  },
+
+  // ====== INSTALL PWA ======
+  _installPrompt: null,
+
+  _initInstall() {
+    const btn = document.getElementById('install-btn');
+    if (!btn) return;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      this._installPrompt = e;
+      btn.style.display = '';
+    });
+
+    btn.addEventListener('click', async () => {
+      if (!this._installPrompt) return;
+      this._installPrompt.prompt();
+      const result = await this._installPrompt.userChoice;
+      if (result.outcome === 'accepted') btn.style.display = 'none';
+      this._installPrompt = null;
+    });
+
+    window.addEventListener('appinstalled', () => {
+      btn.style.display = 'none';
+      this._installPrompt = null;
+    });
   },
 
   // ====== HELPERS ======
