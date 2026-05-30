@@ -511,9 +511,6 @@ const App = {
   _installPrompt: null,
 
   _initInstall() {
-  _installPrompt: null,
-
-  _initInstall() {
     const btn = document.getElementById('install-btn');
     if (!btn) return;
 
