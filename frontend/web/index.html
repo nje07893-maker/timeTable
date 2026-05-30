@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Timetable</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app">
+
+    <div id="app-main">
+
+      <!-- Header -->
+      <header id="header">
+        <div class="header-left">
+          <h1 id="app-title">Timetable</h1>
+          <span id="user-info" class="header-subtitle"></span>
+        </div>
+        <div class="header-right" style="display:flex;align-items:center;gap:10px;">
+          <span id="clock-display" class="clock"></span>
+          <button id="logout-btn" class="btn-logout" title="Sign out">&#x23FB;</button>
+        </div>
+      </header>
+
+      <!-- Navigation -->
+      <nav id="bottom-nav">
+        <button class="nav-btn active" data-view="home">
+          <span class="nav-icon">&#x1F3E0;</span>
+          <span class="nav-label">Home</span>
+        </button>
+        <button class="nav-btn" data-view="week">
+          <span class="nav-icon">&#x1F4C5;</span>
+          <span class="nav-label">Week</span>
+        </button>
+        <button class="nav-btn" data-view="add">
+          <span class="nav-icon">&#x2795;</span>
+          <span class="nav-label">Add</span>
+        </button>
+        <button class="nav-btn admin-only" data-view="admin">
+          <span class="nav-icon">&#x1F465;</span>
+          <span class="nav-label">Users</span>
+        </button>
+        <button class="nav-btn" data-view="settings">
+          <span class="nav-icon">&#x2699;&#xFE0F;</span>
+          <span class="nav-label">Settings</span>
+        </button>
+      </nav>
+
+      <!-- Main Content -->
+      <main id="main-content">
+
+        <!-- ===== HOME VIEW ===== -->
+        <section id="view-home" class="view active">
+          <div id="live-status">
+            <div id="current-period-card" class="status-card current">
+              <div class="status-label">Current Period</div>
+              <div id="current-period-info">—</div>
+              <div id="countdown-timer" class="countdown">--:--</div>
+            </div>
+            <div id="next-period-card" class="status-card next">
+              <div class="status-label">Up Next</div>
+              <div id="next-period-info">—</div>
+              <div id="next-countdown" class="countdown small">--:--</div>
+            </div>
+          </div>
+          <div id="home-day-view">
+            <h2 id="home-day-title">Today's Schedule</h2>
+            <div id="day-schedule-list"></div>
+          </div>
+        </section>
+
+        <!-- ===== WEEK VIEW ===== -->
+        <section id="view-week" class="view">
+          <div class="view-header">
+            <h2>Weekly Timetable</h2>
+            <div class="week-nav">
+              <button class="day-tab active" data-day="M">Mon</button>
+              <button class="day-tab" data-day="T">Tue</button>
+              <button class="day-tab" data-day="W">Wed</button>
+              <button class="day-tab" data-day="Th">Thu</button>
+              <button class="day-tab" data-day="F">Fri</button>
+            </div>
+          </div>
+          <div id="week-grid-container">
+            <table id="week-grid" class="desktop-only">
+              <thead>
+                <tr>
+                  <th class="time-col">#</th>
+                  <th class="time-col">Time</th>
+                  <th class="day-col">Monday</th>
+                  <th class="day-col">Tuesday</th>
+                  <th class="day-col">Wednesday</th>
+                  <th class="day-col">Thursday</th>
+                  <th class="day-col">Friday</th>
+                </tr>
+              </thead>
+              <tbody id="week-grid-body"></tbody>
+            </table>
+            <div id="day-carousel" class="day-carousel mobile-only"></div>
+          </div>
+        </section>
+
+        <!-- ===== ADD/EDIT VIEW ===== -->
+        <section id="view-add" class="view">
+          <div class="view-header">
+            <h2 id="add-title">Add Period</h2>
+          </div>
+          <form id="add-form" class="form-card">
+            <input type="hidden" id="edit-id" value="">
+            <div class="form-row">
+              <label for="add-day">Day</label>
+              <select id="add-day" required>
+                <option value="M">Monday</option>
+                <option value="T">Tuesday</option>
+                <option value="W">Wednesday</option>
+                <option value="Th">Thursday</option>
+                <option value="F">Friday</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label for="add-subject">Subject *</label>
+              <input type="text" id="add-subject" placeholder="e.g. MATH, ICT" required>
+            </div>
+            <div class="form-row">
+              <label for="add-class">Class/Group</label>
+              <input type="text" id="add-class" placeholder="e.g. S1A, Form 3">
+            </div>
+            <div class="form-row">
+              <label for="add-room">Room/Location</label>
+              <input type="text" id="add-room" placeholder="e.g. Rm 12, Lab 2">
+            </div>
+            <div class="form-row">
+              <label for="add-start">Start Time</label>
+              <input type="time" id="add-start" value="08:00">
+            </div>
+            <div class="form-row">
+              <label for="add-duration">Duration (min)</label>
+              <input type="number" id="add-duration" value="40" min="30" max="60">
+            </div>
+            <div class="form-buttons">
+              <button type="submit" id="add-save-btn" class="btn-primary">Save</button>
+              <button type="button" id="add-clear-btn" class="btn-secondary">Clear</button>
+            </div>
+            <div id="add-error" class="error-msg"></div>
+          </form>
+        </section>
+
+        <!-- ===== ADMIN DASHBOARD ===== -->
+        <section id="view-admin" class="view">
+          <div class="view-header">
+            <h2>User Management</h2>
+            <p class="text-muted" style="font-size:0.85rem;">Manage all teacher accounts</p>
+          </div>
+
+          <div class="form-card mb-16">
+            <h3 style="font-size:0.9rem;font-weight:600;margin-bottom:12px;">Add New User</h3>
+            <form id="admin-user-form">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div class="form-row" style="margin:0;">
+                  <input type="text" id="admin-new-username" placeholder="Username *" required>
+                </div>
+                <div class="form-row" style="margin:0;">
+                  <input type="text" id="admin-new-name" placeholder="Full Name">
+                </div>
+                <div class="form-row" style="margin:0;">
+                  <input type="password" id="admin-new-password" placeholder="Password">
+                </div>
+                <div class="form-row" style="margin:0;">
+                  <input type="text" id="admin-new-school" placeholder="School">
+                </div>
+              </div>
+              <div style="display:flex;gap:10px;margin-top:10px;">
+                <button type="submit" class="btn-primary">Add User</button>
+              </div>
+              <div id="admin-error" class="error-msg"></div>
+            </form>
+          </div>
+
+          <div class="form-card">
+            <h3 style="font-size:0.9rem;font-weight:600;margin-bottom:12px;">All Users</h3>
+            <div id="admin-users-list" style="overflow-x:auto;"></div>
+          </div>
+        </section>
+
+        <!-- ===== SETTINGS VIEW ===== -->
+        <section id="view-settings" class="view">
+          <div class="view-header">
+            <h2>Settings</h2>
+            <p class="text-muted" style="font-size:0.85rem;">Configure your timetable preferences</p>
+          </div>
+
+          <!-- Profile -->
+          <div class="settings-card">
+            <div class="settings-card-header">
+              <span class="settings-icon">&#x1F464;</span>
+              <div>
+                <h3>Profile</h3>
+                <p class="settings-card-desc">Your name and school information</p>
+              </div>
+            </div>
+            <div class="settings-card-body">
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span class="setting-label-text">Teacher Name</span>
+                  <span class="setting-label-hint">Displayed on the timetable</span>
+                </div>
+                <input type="text" id="set-teacher" placeholder="Your name" class="setting-input">
+              </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span class="setting-label-text">School Name</span>
+                  <span class="setting-label-hint">Displayed in the header</span>
+                </div>
+                <input type="text" id="set-school" placeholder="School name" class="setting-input">
+              </div>
+            </div>
+          </div>
+
+          <!-- Schedule -->
+          <div class="settings-card">
+            <div class="settings-card-header">
+              <span class="settings-icon">&#x1F4C5;</span>
+              <div>
+                <h3>Schedule</h3>
+                <p class="settings-card-desc">School hours and period settings</p>
+              </div>
+            </div>
+            <div class="settings-card-body">
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span class="setting-label-text">School Start</span>
+                  <span class="setting-label-hint">First period begins</span>
+                </div>
+                <input type="time" id="set-start" value="08:00" class="setting-input setting-input--short">
+              </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span class="setting-label-text">Period Duration</span>
+                  <span class="setting-label-hint">Minutes per class</span>
+                </div>
+                <input type="number" id="set-duration" value="40" min="30" max="60" class="setting-input setting-input--short">
+              </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span class="setting-label-text">Periods Per Day</span>
+                  <span class="setting-label-hint">Maximum slots</span>
+                </div>
+                <input type="number" id="set-periods" value="12" min="6" max="16" class="setting-input setting-input--short">
+              </div>
+            </div>
+          </div>
+
+          <!-- Display & Sound -->
+          <div class="settings-card">
+            <div class="settings-card-header">
+              <span class="settings-icon">&#x1F3A8;</span>
+              <div>
+                <h3>Display &amp; Sound</h3>
+                <p class="settings-card-desc">Visual and audio preferences</p>
+              </div>
+            </div>
+            <div class="settings-card-body">
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span class="setting-label-text">Dark Mode</span>
+                  <span class="setting-label-hint">Switch to dark theme</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="set-darkmode">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span class="setting-label-text">Sound Alerts</span>
+                  <span class="setting-label-hint">Play sound at period end</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="set-sound" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span class="setting-label-text">Notifications</span>
+                  <span class="setting-label-hint">Browser push alerts</span>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="set-notifications" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span class="setting-label-text">Alert Sound</span>
+                  <span class="setting-label-hint">Choose notification tone</span>
+                </div>
+                <select id="set-sound-type" class="setting-input setting-input--short">
+                  <option value="bell">Classic Bell</option>
+                  <option value="chime">Chime</option>
+                  <option value="buzzer">Buzzer</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Account -->
+          <div class="settings-card">
+            <div class="settings-card-header">
+              <span class="settings-icon">&#x1F512;</span>
+              <div>
+                <h3>Account</h3>
+                <p class="settings-card-desc">Sign in for admin access</p>
+              </div>
+            </div>
+            <div class="settings-card-body">
+              <div id="settings-login-section">
+                <div class="setting-row">
+                  <div class="setting-label">
+                    <span class="setting-label-text">Username</span>
+                    <span class="setting-label-hint">Enter your credentials</span>
+                  </div>
+                  <input type="text" id="settings-login-username" placeholder="Username" class="setting-input setting-input--short">
+                </div>
+                <div class="setting-row">
+                  <div class="setting-label">
+                    <span class="setting-label-text">Password</span>
+                    <span class="setting-label-hint">Case-sensitive</span>
+                  </div>
+                  <input type="password" id="settings-login-password" placeholder="Password" class="setting-input setting-input--short">
+                </div>
+                <div id="settings-login-error" class="error-msg"></div>
+                <button type="button" id="settings-login-btn" class="btn-primary btn-block" style="margin-top:4px;">Sign In</button>
+              </div>
+              <div id="settings-loggedin-section" class="hidden">
+                <div class="signed-in-badge">
+                  <span class="signed-in-icon">&#x2705;</span>
+                  <div>
+                    <strong id="settings-user-display">—</strong>
+                    <span class="text-muted" style="font-size:0.8rem;display:block;">Signed in</span>
+                  </div>
+                </div>
+                <button type="button" id="settings-logout-btn" class="btn-secondary btn-block">Sign Out</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Data Management -->
+          <div class="settings-card">
+            <div class="settings-card-header">
+              <span class="settings-icon">&#x1F4BE;</span>
+              <div>
+                <h3>Data Management</h3>
+                <p class="settings-card-desc">Backup, restore, and reset your data</p>
+              </div>
+            </div>
+            <div class="settings-card-body">
+              <div class="data-actions">
+                <button type="button" id="export-json-btn" class="action-btn">
+                  <span class="action-btn-icon">&#x1F4E4;</span>
+                  <div class="action-btn-text">
+                    <span class="action-btn-title">Export JSON</span>
+                    <span class="action-btn-desc">Download timetable as JSON file</span>
+                  </div>
+                </button>
+                <button type="button" id="import-json-btn" class="action-btn">
+                  <span class="action-btn-icon">&#x1F4E5;</span>
+                  <div class="action-btn-text">
+                    <span class="action-btn-title">Import JSON</span>
+                    <span class="action-btn-desc">Restore from a backup file</span>
+                  </div>
+                </button>
+                <input type="file" id="import-file" accept=".json" style="display:none">
+                <button type="button" id="export-pdf-btn" class="action-btn">
+                  <span class="action-btn-icon">&#x1F4C4;</span>
+                  <div class="action-btn-text">
+                    <span class="action-btn-title">Export as PDF</span>
+                    <span class="action-btn-desc">Print or save timetable as PDF</span>
+                  </div>
+                </button>
+                <button type="button" id="reset-data-btn" class="action-btn action-btn--danger">
+                  <span class="action-btn-icon">&#x26A0;&#xFE0F;</span>
+                  <div class="action-btn-text">
+                    <span class="action-btn-title">Reset All Data</span>
+                    <span class="action-btn-desc">Clear all entries and restore defaults</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <button type="button" id="set-save-btn" class="btn-primary btn-block" style="margin-top:4px;">Save Settings</button>
+        </section>
+      </main>
+
+      <!-- Notification Toast -->
+      <div id="notification-toast" class="toast hidden">
+        <div id="toast-title" class="toast-title"></div>
+        <div id="toast-body" class="toast-body"></div>
+      </div>
+
+      <!-- Modal for period detail -->
+      <div id="period-modal" class="modal hidden">
+        <div class="modal-content">
+          <span id="modal-close" class="modal-close">&times;</span>
+          <h3 id="modal-title">Period Detail</h3>
+          <div id="modal-body"></div>
+          <div class="modal-actions">
+            <button id="modal-edit-btn" class="btn-primary">Edit</button>
+            <button id="modal-delete-btn" class="btn-danger">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  </script>
+  <script src="js/timetable.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
