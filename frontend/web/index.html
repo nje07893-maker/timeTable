@@ -24,11 +24,9 @@
       <header id="header">
         <div class="header-left">
           <h1 id="app-title">Timetable</h1>
-          <span id="user-info" class="header-subtitle"></span>
         </div>
         <div class="header-right" style="display:flex;align-items:center;gap:10px;">
           <span id="clock-display" class="clock"></span>
-          <button id="logout-btn" class="btn-logout" title="Sign out">&#x23FB;</button>
         </div>
       </header>
 
@@ -45,10 +43,6 @@
         <button class="nav-btn" data-view="add">
           <span class="nav-icon">&#x2795;</span>
           <span class="nav-label">Add</span>
-        </button>
-        <button class="nav-btn admin-only" data-view="admin">
-          <span class="nav-icon">&#x1F465;</span>
-          <span class="nav-label">Users</span>
         </button>
         <button class="nav-btn" data-view="settings">
           <span class="nav-icon">&#x2699;&#xFE0F;</span>
@@ -153,43 +147,6 @@
             </div>
             <div id="add-error" class="error-msg"></div>
           </form>
-        </section>
-
-        <!-- ===== ADMIN DASHBOARD ===== -->
-        <section id="view-admin" class="view">
-          <div class="view-header">
-            <h2>User Management</h2>
-            <p class="text-muted" style="font-size:0.85rem;">Manage all teacher accounts</p>
-          </div>
-
-          <div class="form-card mb-16">
-            <h3 style="font-size:0.9rem;font-weight:600;margin-bottom:12px;">Add New User</h3>
-            <form id="admin-user-form">
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                <div class="form-row" style="margin:0;">
-                  <input type="text" id="admin-new-username" placeholder="Username *" required>
-                </div>
-                <div class="form-row" style="margin:0;">
-                  <input type="text" id="admin-new-name" placeholder="Full Name">
-                </div>
-                <div class="form-row" style="margin:0;">
-                  <input type="password" id="admin-new-password" placeholder="Password">
-                </div>
-                <div class="form-row" style="margin:0;">
-                  <input type="text" id="admin-new-school" placeholder="School">
-                </div>
-              </div>
-              <div style="display:flex;gap:10px;margin-top:10px;">
-                <button type="submit" class="btn-primary">Add User</button>
-              </div>
-              <div id="admin-error" class="error-msg"></div>
-            </form>
-          </div>
-
-          <div class="form-card">
-            <h3 style="font-size:0.9rem;font-weight:600;margin-bottom:12px;">All Users</h3>
-            <div id="admin-users-list" style="overflow-x:auto;"></div>
-          </div>
         </section>
 
         <!-- ===== SETTINGS VIEW ===== -->
@@ -314,47 +271,7 @@
             </div>
           </div>
 
-          <!-- Account -->
-          <div class="settings-card">
-            <div class="settings-card-header">
-              <span class="settings-icon">&#x1F512;</span>
-              <div>
-                <h3>Account</h3>
-                <p class="settings-card-desc">Sign in for admin access</p>
-              </div>
-            </div>
-            <div class="settings-card-body">
-              <div id="settings-login-section">
-                <div class="setting-row">
-                  <div class="setting-label">
-                    <span class="setting-label-text">Username</span>
-                    <span class="setting-label-hint">Enter your credentials</span>
-                  </div>
-                  <input type="text" id="settings-login-username" placeholder="Username" class="setting-input setting-input--short">
-                </div>
-                <div class="setting-row">
-                  <div class="setting-label">
-                    <span class="setting-label-text">Password</span>
-                    <span class="setting-label-hint">Case-sensitive</span>
-                  </div>
-                  <input type="password" id="settings-login-password" placeholder="Password" class="setting-input setting-input--short">
-                </div>
-                <div id="settings-login-error" class="error-msg"></div>
-                <button type="button" id="settings-login-btn" class="btn-primary btn-block" style="margin-top:4px;">Sign In</button>
-              </div>
-              <div id="settings-loggedin-section" class="hidden">
-                <div class="signed-in-badge">
-                  <span class="signed-in-icon">&#x2705;</span>
-                  <div>
-                    <strong id="settings-user-display">—</strong>
-                    <span class="text-muted" style="font-size:0.8rem;display:block;">Signed in</span>
-                  </div>
-                </div>
-                <button type="button" id="settings-logout-btn" class="btn-secondary btn-block">Sign Out</button>
-              </div>
-            </div>
-          </div>
-
+          
           <!-- Data Management -->
           <div class="settings-card">
             <div class="settings-card-header">

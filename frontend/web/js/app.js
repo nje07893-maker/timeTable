@@ -1,8 +1,3 @@
-// ====== API CONFIG ======
-// For local dev: leave empty (same origin)
-// For Vercel frontend + Render backend: set to "https://your-app.onrender.com"
-const API_BASE = '';
-
 // ====== CUSTOM CONFIRM DIALOG ======
 function showConfirm(title, message) {
   return new Promise((resolve) => {
@@ -35,103 +30,6 @@ function showToast(title, body, type) {
   setTimeout(() => toast.classList.add('hidden'), 5000);
 }
 
-// ====== AUTH MODULE ======
-const Auth = {
-  token: null,
-  user: null,
-  users: [],
-
-  async login(username, password) {
-    try {
-      const res = await fetch(API_BASE + '/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Login failed');
-      this.token = data.token;
-      this.user = data.user;
-      localStorage.setItem('auth_token', this.token);
-      localStorage.setItem('auth_user', JSON.stringify(this.user));
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  },
-
-  async logout() {
-    try {
-      await fetch(API_BASE + '/api/auth/logout', { method: 'POST', headers: this._headers() });
-    } catch {}
-    this.token = null;
-    this.user = null;
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_user');
-  },
-
-  async checkSession() {
-    const token = localStorage.getItem('auth_token');
-    const user = localStorage.getItem('auth_user');
-    if (!token || !user) return false;
-    this.token = token;
-    this.user = JSON.parse(user);
-    // Verify with server
-    try {
-      const res = await fetch(API_BASE + '/api/auth/me', { headers: this._headers() });
-      if (!res.ok) throw new Error('Session expired');
-      const data = await res.json();
-      this.token = data.token;
-      this.user = data.user;
-      localStorage.setItem('auth_token', this.token);
-      localStorage.setItem('auth_user', JSON.stringify(this.user));
-      return true;
-    } catch {
-      await this.logout();
-      return false;
-    }
-  },
-
-  isAdmin() { return this.user?.role === 'admin'; },
-  isTeacher() { return this.user?.role === 'teacher'; },
-
-  async fetchUsers() {
-    const res = await fetch(API_BASE + '/api/auth/users', { headers: this._headers() });
-    if (!res.ok) return [];
-    this.users = await res.json();
-    return this.users;
-  },
-
-  async createUser(data) {
-    const res = await fetch(API_BASE + '/api/auth/users', {
-      method: 'POST',
-      headers: { ...this._headers(), 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    return res.ok ? { ok: true, user: await res.json() } : { ok: false, error: (await res.json()).error };
-  },
-
-  async deleteUser(id) {
-    const res = await fetch(API_BASE + `/api/auth/users/${id}`, { method: 'DELETE', headers: this._headers() });
-    return res.ok;
-  },
-
-  async updateUser(id, data) {
-    const res = await fetch(API_BASE + `/api/auth/users/${id}`, {
-      method: 'PUT',
-      headers: { ...this._headers(), 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    return res.ok;
-  },
-
-  _headers() {
-    const h = { 'Content-Type': 'application/json' };
-    if (this.token) h['Authorization'] = `Bearer ${this.token}`;
-    return h;
-  }
-};
-
 // ====== APP CONTROLLER ======
 const App = {
   currentView: 'home',
@@ -140,62 +38,26 @@ const App = {
   _tickTimer: null,
 
   async init() {
-    await Auth.checkSession();
-    document.getElementById('logout-btn').style.display = Auth.user ? '' : 'none';
     this._bootApp();
   },
 
   async _bootApp() {
-    // Show/hide admin nav button
-    document.querySelectorAll('.admin-only').forEach(el => {
-      el.style.display = Auth.isAdmin() ? '' : 'none';
-    });
-
-    // Show username in header
-    const info = document.getElementById('user-info');
-    if (Auth.user) {
-      info.textContent = `${Auth.user.name || Auth.user.username} (${Auth.user.role})`;
-    } else {
-      info.textContent = 'Not signed in';
-    }
-
-    // Settings login/logout section
-    this._bindSettingsLogin();
-
-    // Load data
     Settings.load();
     Timetable.load();
     Notifications.init();
     Settings.applyTheme();
     this.updateHeader();
 
-    // Navigation
     document.querySelectorAll('.nav-btn').forEach(btn => {
       btn.addEventListener('click', () => this.switchView(btn.dataset.view));
     });
 
-    // Day tabs
     document.querySelectorAll('.day-tab').forEach(tab => {
       tab.addEventListener('click', () => this.selectDay(tab.dataset.day));
     });
 
     this._initDayCarousel();
 
-    // Logout in header
-    document.getElementById('logout-btn').style.display = Auth.user ? '' : 'none';
-    document.getElementById('logout-btn').addEventListener('click', async () => {
-      if (!Auth.user) return;
-      const ok = await showConfirm('Sign Out', 'Are you sure you want to sign out?');
-      if (!ok) return;
-      await Auth.logout();
-      this._updateSettingsLoginUI();
-      document.getElementById('logout-btn').style.display = 'none';
-      document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
-      document.getElementById('user-info').textContent = 'Not signed in';
-      showToast('Signed Out', 'You have been signed out', 'info');
-    });
-
-    // Form
     document.getElementById('add-form').addEventListener('submit', (e) => this.handleFormSubmit(e));
     document.getElementById('add-clear-btn').addEventListener('click', () => this.clearForm());
 
@@ -204,26 +66,17 @@ const App = {
       preview.style.background = e.target.value.trim() ? Timetable.getSubjectColor(e.target.value.trim()) : '';
     });
 
-    // Settings
     document.getElementById('set-save-btn').addEventListener('click', () => this.saveSettings());
     document.getElementById('set-darkmode').addEventListener('change', (e) => {
       document.body.classList.toggle('dark', e.target.checked);
     });
 
-    // Data
     document.getElementById('export-json-btn').addEventListener('click', () => this.exportJSON());
     document.getElementById('import-json-btn').addEventListener('click', () => document.getElementById('import-file').click());
     document.getElementById('import-file').addEventListener('change', (e) => this.importJSON(e));
     document.getElementById('export-pdf-btn').addEventListener('click', () => this.exportPDF());
     document.getElementById('reset-data-btn').addEventListener('click', () => this.resetData());
 
-    // Admin
-    if (Auth.isAdmin()) {
-      document.getElementById('admin-user-form').addEventListener('submit', (e) => this.adminCreateUser(e));
-      this.adminLoadUsers();
-    }
-
-    // Modal
     document.getElementById('modal-close').addEventListener('click', () => this.closeModal());
     document.getElementById('modal-edit-btn').addEventListener('click', () => this.editFromModal());
     document.getElementById('modal-delete-btn').addEventListener('click', () => this.deleteFromModal());
@@ -231,7 +84,6 @@ const App = {
       if (e.target === e.currentTarget) this.closeModal();
     });
 
-    // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') { this.closeModal(); }
       if (e.key >= '1' && e.key <= '5') {
@@ -242,10 +94,8 @@ const App = {
       if (e.key === 'w' || e.key === 'W') this.switchView('week');
       if (e.key === 'a' || e.key === 'A') { this.switchView('add'); this.clearForm(); }
       if (e.key === 's' || e.key === 'S') this.switchView('settings');
-      if ((e.key === 'u' || e.key === 'U') && Auth.isAdmin()) { this.switchView('admin'); this.adminLoadUsers(); }
     });
 
-    // Renders
     this.renderHome();
     this.renderWeekGrid();
     this.startClock();
@@ -296,78 +146,13 @@ const App = {
     if (target) target.classList.add('active');
     if (view === 'home') this.renderHome();
     if (view === 'week') this.renderWeekGrid();
-    if (view === 'admin') this.adminLoadUsers();
-  },
-
-  _bindSettingsLogin() {
-    document.getElementById('settings-login-btn').addEventListener('click', () => this._handleSettingsLogin());
-    document.getElementById('settings-login-password').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') this._handleSettingsLogin();
-    });
-    document.getElementById('settings-logout-btn').addEventListener('click', async () => {
-      await Auth.logout();
-      this._updateSettingsLoginUI();
-      document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
-      document.getElementById('user-info').textContent = 'Not signed in';
-      showToast('Signed Out', 'You have been signed out', 'info');
-    });
-    this._updateSettingsLoginUI();
-  },
-
-  _updateSettingsLoginUI() {
-    const loginSection = document.getElementById('settings-login-section');
-    const loggedinSection = document.getElementById('settings-loggedin-section');
-    if (Auth.user) {
-      loginSection.classList.add('hidden');
-      loggedinSection.classList.remove('hidden');
-      document.getElementById('settings-user-display').textContent =
-        `${Auth.user.name || Auth.user.username} (${Auth.user.role})`;
-    } else {
-      loginSection.classList.remove('hidden');
-      loggedinSection.classList.add('hidden');
-    }
-  },
-
-  async _handleSettingsLogin() {
-    const username = document.getElementById('settings-login-username').value.trim();
-    const password = document.getElementById('settings-login-password').value;
-    const errorEl = document.getElementById('settings-login-error');
-    const btn = document.getElementById('settings-login-btn');
-
-    errorEl.textContent = '';
-    btn.textContent = 'Signing in...';
-    btn.disabled = true;
-
-    const result = await Auth.login(username, password);
-    btn.textContent = 'Sign In';
-    btn.disabled = false;
-
-    if (result.ok) {
-      this._updateSettingsLoginUI();
-      document.querySelectorAll('.admin-only').forEach(el => {
-        el.style.display = Auth.isAdmin() ? '' : 'none';
-      });
-      document.getElementById('user-info').textContent =
-        `${Auth.user.name || Auth.user.username} (${Auth.user.role})`;
-      showToast('Signed In', `Welcome, ${Auth.user.name || Auth.user.username}`, 'info');
-      document.getElementById('settings-login-username').value = '';
-      document.getElementById('settings-login-password').value = '';
-      if (Auth.isAdmin()) this.adminLoadUsers();
-    } else {
-      errorEl.textContent = result.error || 'Invalid credentials';
-    }
   },
 
   updateHeader() {
     const teacher = Settings.get('teacherName');
     const school = Settings.get('schoolName');
-    const info = document.getElementById('user-info');
-    if (Auth.user) {
-      const name = teacher || Auth.user.name || Auth.user.username;
-      info.textContent = school ? `${name} · ${school}` : name;
-    } else {
-      info.textContent = 'Not signed in';
-    }
+    const name = teacher || 'Teacher';
+    document.getElementById('app-title').textContent = school ? `${name} · ${school}` : name;
   },
 
   startClock() {
@@ -647,71 +432,6 @@ const App = {
     if (!await showConfirm('Reset Data', 'Delete all entries and restore demo data?')) return;
     Timetable.reset(); this.renderHome(); this.renderWeekGrid();
     showToast('Reset', 'Demo data restored', 'info');
-  },
-
-  // ====== ADMIN ======
-  async adminLoadUsers() {
-    if (!Auth.isAdmin()) return;
-    await Auth.fetchUsers();
-    const container = document.getElementById('admin-users-list');
-    if (!Auth.users.length) { container.innerHTML = '<p class="text-muted">No users found</p>'; return; }
-
-    let html = '<table style="width:100%;border-collapse:collapse;font-size:0.8rem;">';
-    html += '<tr style="background:var(--bg);font-weight:600;"><th style="padding:8px 6px;border:1px solid var(--border);text-align:left;">Username</th><th style="padding:8px 6px;border:1px solid var(--border);text-align:left;">Name</th><th style="padding:8px 6px;border:1px solid var(--border);text-align:left;">Role</th><th style="padding:8px 6px;border:1px solid var(--border);text-align:left;">School</th><th style="padding:8px 6px;border:1px solid var(--border);text-align:center;">Actions</th></tr>';
-
-    Auth.users.forEach(u => {
-      html += `<tr>
-        <td style="padding:8px 6px;border:1px solid var(--border);">${u.username}</td>
-        <td style="padding:8px 6px;border:1px solid var(--border);">${u.name || '—'}</td>
-        <td style="padding:8px 6px;border:1px solid var(--border);"><span style="background:${u.role === 'admin' ? '#f59e0b' : '#4A6CF7'};color:#fff;padding:2px 8px;border-radius:4px;font-size:0.7rem;">${u.role}</span></td>
-        <td style="padding:8px 6px;border:1px solid var(--border);">${u.school || '—'}</td>
-        <td style="padding:8px 6px;border:1px solid var(--border);text-align:center;">
-          ${u.role !== 'admin' ? `<button class="admin-del-btn" data-id="${u.id}" style="background:var(--danger);color:#fff;border:none;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:0.7rem;">Delete</button>` : '<span style="color:var(--text-secondary);font-size:0.7rem;">—</span>'}
-        </td>
-      </tr>`;
-    });
-    html += '</table>';
-    container.innerHTML = html;
-
-    // Bind delete buttons
-    container.querySelectorAll('.admin-del-btn').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = btn.dataset.id;
-        const user = Auth.users.find(u => u.id === id);
-        if (!user) return;
-        if (!await showConfirm('Delete User', `Delete "${user.username}"? This cannot be undone.`)) return;
-        if (await Auth.deleteUser(id)) {
-          showToast('Deleted', `User ${user.username} deleted`, 'info');
-          this.adminLoadUsers();
-        } else {
-          showToast('Error', 'Failed to delete user', 'period-end');
-        }
-      });
-    });
-  },
-
-  async adminCreateUser(e) {
-    e.preventDefault();
-    const username = document.getElementById('admin-new-username').value.trim();
-    const name = document.getElementById('admin-new-name').value.trim();
-    const password = document.getElementById('admin-new-password').value.trim();
-    const school = document.getElementById('admin-new-school').value.trim();
-    const errorEl = document.getElementById('admin-error');
-
-    if (!username) { errorEl.textContent = 'Username required'; return; }
-    errorEl.textContent = '';
-
-    const result = await Auth.createUser({ username, name, password: password || 'password123', school, role: 'teacher' });
-    if (result.ok) {
-      showToast('User Added', `${result.user.username} created`, 'info');
-      document.getElementById('admin-new-username').value = '';
-      document.getElementById('admin-new-name').value = '';
-      document.getElementById('admin-new-password').value = '';
-      document.getElementById('admin-new-school').value = '';
-      this.adminLoadUsers();
-    } else {
-      errorEl.textContent = result.error || 'Failed to create user';
-    }
   },
 
   // ====== HELPERS ======
