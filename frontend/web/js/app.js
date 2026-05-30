@@ -171,7 +171,14 @@ const App = {
 
   startLiveCountdown() {
     if (this._tickTimer) clearInterval(this._tickTimer);
-    this._tickTimer = setInterval(() => this.renderHome(), 1000);
+    this._tickTimer = setInterval(() => {
+      this.renderHome();
+      Notifications.checkWeekendAlerts();
+    }, 1000);
+    // Reset weekend alerts once at midnight check
+    const now = new Date();
+    const msToMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0) - now;
+    setTimeout(() => { Notifications.resetWeekendAlerts(); }, msToMidnight);
   },
 
   // ====== HOME ======
@@ -216,6 +223,7 @@ const App = {
 
     if (dayKey === 'SUN' || dayKey === 'S') {
       scheduleList.innerHTML = '<p class="text-muted text-center" style="padding:40px 0;">No classes today — enjoy your weekend!</p>';
+      this._renderHomeWeekend(dayKey === 'S' ? 'Sat' : 'Sun');
       return;
     }
 
@@ -252,6 +260,69 @@ const App = {
       }
       scheduleList.appendChild(div);
     });
+    this._renderHomeWeekend();
+  },
+
+  _renderHomeWeekend(dayOverride) {
+    const section = document.getElementById('home-weekend-section');
+    const list = document.getElementById('home-weekend-list');
+    const title = document.getElementById('home-weekend-title');
+    if (!section || !list || !title) return;
+
+    const now = new Date();
+    const dayNum = now.getDay();
+
+    if (dayOverride) {
+      title.textContent = dayOverride === 'Sat' ? 'Saturday Activities' : 'Sunday Activities';
+      const activities = Timetable.getWeekend(dayOverride);
+      if (!activities.length) {
+        section.classList.add('hidden');
+        return;
+      }
+      section.classList.remove('hidden');
+      this._renderHomeWeekendList(list, activities);
+      return;
+    }
+
+    // Weekday: show upcoming weekend activities
+    if (dayNum >= 1 && dayNum <= 5) {
+      const satActivities = Timetable.getWeekend('Sat');
+      const sunActivities = Timetable.getWeekend('Sun');
+      const hasSat = satActivities.length > 0;
+      const hasSun = sunActivities.length > 0;
+      if (!hasSat && !hasSun) {
+        section.classList.add('hidden');
+        return;
+      }
+      section.classList.remove('hidden');
+      title.textContent = 'Upcoming Weekend';
+      list.innerHTML = '';
+      if (hasSat) {
+        const h = document.createElement('div'); h.className = 'home-weekend-label'; h.textContent = 'Saturday'; h.style.cssText = 'font-size:0.78rem;font-weight:600;color:var(--primary);margin:8px 0 4px 4px;';
+        list.appendChild(h);
+        this._renderHomeWeekendList(list, satActivities);
+      }
+      if (hasSun) {
+        const h = document.createElement('div'); h.className = 'home-weekend-label'; h.textContent = 'Sunday'; h.style.cssText = 'font-size:0.78rem;font-weight:600;color:var(--primary);margin:8px 0 4px 4px;';
+        list.appendChild(h);
+        this._renderHomeWeekendList(list, sunActivities);
+      }
+    } else {
+      // Shouldn't reach here - Sat/Sun handled above in dayOverride path
+      section.classList.add('hidden');
+    }
+  },
+
+  _renderHomeWeekendList(list, activities) {
+    list.innerHTML = activities.map(a => `
+      <div class="home-weekend-activity">
+        <div class="home-weekend-color" style="background:${a.color || Timetable.getSubjectColor(a.name)}"></div>
+        <div class="home-weekend-body">
+          <div class="home-weekend-name">${a.name}</div>
+          ${a.time ? `<div class="home-weekend-time">${a.time}</div>` : ''}
+        </div>
+      </div>
+    `).join('');
   },
 
   // ====== WEEK ======

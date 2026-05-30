@@ -812,6 +812,55 @@ hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
 
 .weekend-del-btn:hover { background: var(--danger-bg); color: var(--danger); }
 
+/* ===== HOME WEEKEND SECTION ===== */
+#home-weekend-section {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+#home-weekend-section.hidden { display: none !important; }
+#home-weekend-section h2 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+.home-weekend-activity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-bottom: 6px;
+  box-shadow: var(--shadow);
+  transition: transform var(--transition);
+}
+.home-weekend-activity:hover { transform: translateY(-1px); }
+.home-weekend-activity .home-weekend-color {
+  width: 4px;
+  height: 36px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.home-weekend-activity .home-weekend-body { flex: 1; min-width: 0; }
+.home-weekend-activity .home-weekend-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.home-weekend-activity .home-weekend-time {
+  font-size: 0.72rem;
+  color: var(--primary);
+  margin-top: 1px;
+}
+.home-weekend-empty {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
 /* ===== RESPONSIVE NAV OVERFLOW ===== */
 #bottom-nav {
   overflow-x: auto;

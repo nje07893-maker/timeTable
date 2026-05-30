@@ -167,5 +167,45 @@ const Notifications = {
       );
       this.showToast('5 Minutes Left', `${current.subject} ${current.classGroup || ''} ending soon`, 'warning');
     }
+  },
+
+  checkWeekendAlerts() {
+    const now = new Date();
+    const dayNum = now.getDay();
+    const dayKey = dayNum === 6 ? 'Sat' : dayNum === 0 ? 'Sun' : null;
+    if (!dayKey) return;
+
+    const activities = Timetable.getWeekend && Timetable.getWeekend(dayKey);
+    if (!activities || !activities.length) return;
+
+    const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+    activities.forEach(a => {
+      if (!a.time || a._alerted) return;
+      if (a.time === currentTime) {
+        a._alerted = true;
+        this.playSound();
+        this.sendBrowserNotification('Activity Now', `${a.name} is starting now!`);
+        this.showToast('Activity Now', `${a.name} is starting`, 'period-end');
+        // Re-save so _alerted persists across ticks
+        try {
+          const all = JSON.parse(localStorage.getItem('timetable_weekend')) || {};
+          const dayArr = all[dayKey] || [];
+          const idx = dayArr.findIndex(x => x.id === a.id);
+          if (idx !== -1) { dayArr[idx]._alerted = true; localStorage.setItem('timetable_weekend', JSON.stringify(all)); }
+        } catch (e) {}
+      }
+    });
+  },
+
+  resetWeekendAlerts() {
+    // Clear _alerted flags on all weekend activities at midnight
+    try {
+      const all = JSON.parse(localStorage.getItem('timetable_weekend')) || {};
+      Object.keys(all).forEach(day => {
+        all[day] = all[day].map(a => { delete a._alerted; return a; });
+      });
+      localStorage.setItem('timetable_weekend', JSON.stringify(all));
+    } catch (e) {}
   }
 };
