@@ -1,3 +1,8 @@
+// ====== API CONFIG ======
+// For local dev: leave empty (same origin)
+// For Vercel frontend + Render backend: set to "https://your-app.onrender.com"
+const API_BASE = '';
+
 // ====== CUSTOM CONFIRM DIALOG ======
 function showConfirm(title, message) {
   return new Promise((resolve) => {
@@ -38,7 +43,7 @@ const Auth = {
 
   async login(username, password) {
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(API_BASE + '/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
@@ -57,7 +62,7 @@ const Auth = {
 
   async logout() {
     try {
-      await fetch('/api/auth/logout', { method: 'POST', headers: this._headers() });
+      await fetch(API_BASE + '/api/auth/logout', { method: 'POST', headers: this._headers() });
     } catch {}
     this.token = null;
     this.user = null;
@@ -73,7 +78,7 @@ const Auth = {
     this.user = JSON.parse(user);
     // Verify with server
     try {
-      const res = await fetch('/api/auth/me', { headers: this._headers() });
+      const res = await fetch(API_BASE + '/api/auth/me', { headers: this._headers() });
       if (!res.ok) throw new Error('Session expired');
       const data = await res.json();
       this.token = data.token;
@@ -91,14 +96,14 @@ const Auth = {
   isTeacher() { return this.user?.role === 'teacher'; },
 
   async fetchUsers() {
-    const res = await fetch('/api/auth/users', { headers: this._headers() });
+    const res = await fetch(API_BASE + '/api/auth/users', { headers: this._headers() });
     if (!res.ok) return [];
     this.users = await res.json();
     return this.users;
   },
 
   async createUser(data) {
-    const res = await fetch('/api/auth/users', {
+    const res = await fetch(API_BASE + '/api/auth/users', {
       method: 'POST',
       headers: { ...this._headers(), 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -107,12 +112,12 @@ const Auth = {
   },
 
   async deleteUser(id) {
-    const res = await fetch(`/api/auth/users/${id}`, { method: 'DELETE', headers: this._headers() });
+    const res = await fetch(API_BASE + `/api/auth/users/${id}`, { method: 'DELETE', headers: this._headers() });
     return res.ok;
   },
 
   async updateUser(id, data) {
-    const res = await fetch(`/api/auth/users/${id}`, {
+    const res = await fetch(API_BASE + `/api/auth/users/${id}`, {
       method: 'PUT',
       headers: { ...this._headers(), 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
