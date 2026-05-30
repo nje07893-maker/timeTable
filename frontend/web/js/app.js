@@ -314,15 +314,17 @@ const App = {
   },
 
   _renderHomeWeekendList(list, activities) {
-    list.innerHTML = activities.map(a => `
-      <div class="home-weekend-activity">
+    list.innerHTML = activities.map(a => {
+      const done = a._alerted;
+      return `
+      <div class="home-weekend-activity${done ? ' done' : ''}">
         <div class="home-weekend-color" style="background:${a.color || Timetable.getSubjectColor(a.name)}"></div>
         <div class="home-weekend-body">
-          <div class="home-weekend-name">${a.name}</div>
+          <div class="home-weekend-name">${a.name}${done ? ' <span class="done-badge">&#x2713; Done</span>' : ''}</div>
           ${a.time ? `<div class="home-weekend-time">${a.time}</div>` : ''}
         </div>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
   },
 
   // ====== WEEK ======
@@ -530,6 +532,17 @@ const App = {
     this._renderWeekend();
   },
 
+  _toggleWeekendDone(id) {
+    const day = this._weekendDay;
+    const all = JSON.parse(localStorage.getItem('timetable_weekend')) || {};
+    if (!all[day]) return;
+    const idx = all[day].findIndex(a => a.id === id);
+    if (idx === -1) return;
+    all[day][idx]._alerted = !all[day][idx]._alerted;
+    localStorage.setItem('timetable_weekend', JSON.stringify(all));
+    this._renderWeekend();
+  },
+
   _renderWeekend() {
     const list = document.getElementById('weekend-activity-list');
     const activities = Timetable.getWeekend(this._weekendDay);
@@ -537,17 +550,20 @@ const App = {
       list.innerHTML = '<div class="weekend-empty"><span class="weekend-empty-icon">&#x1F3D4;</span><p>No activities planned</p><span class="text-muted" style="font-size:0.8rem;">Add your first activity above</span></div>';
       return;
     }
-    list.innerHTML = activities.map(a => `
-      <div class="weekend-activity">
+    list.innerHTML = activities.map(a => {
+      const done = a._alerted;
+      return `
+      <div class="weekend-activity${done ? ' done' : ''}">
         <div class="weekend-activity-color" style="background:${a.color || Timetable.getSubjectColor(a.name)}"></div>
         <div class="weekend-activity-body">
-          <div class="weekend-activity-name">${a.name}</div>
+          <div class="weekend-activity-name">${a.name}${done ? ' <span class="done-badge">&#x2713; Done</span>' : ''}</div>
           ${a.time ? `<div class="weekend-activity-time">&#x1F552; ${a.time}</div>` : ''}
           ${a.note ? `<div class="weekend-activity-note">${a.note}</div>` : ''}
         </div>
+        <button class="weekend-done-btn${done ? ' done' : ''}" data-id="${a.id}" title="${done ? 'Mark pending' : 'Mark done'}">&#x2713;</button>
         <button class="weekend-del-btn" data-id="${a.id}">&#x2716;</button>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
 
     list.querySelectorAll('.weekend-del-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -555,6 +571,9 @@ const App = {
         this._renderWeekend();
         showToast('Removed', 'Activity deleted', 'info');
       });
+    });
+    list.querySelectorAll('.weekend-done-btn').forEach(btn => {
+      btn.addEventListener('click', () => this._toggleWeekendDone(btn.dataset.id));
     });
   },
 
