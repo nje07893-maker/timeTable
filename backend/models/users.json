@@ -1,0 +1,22 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "username": "jeremie",
+      "password": "123",
+      "name": "Jeremie Admin",
+      "role": "admin",
+      "school": "Springfield High",
+      "createdAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "2",
+      "username": "teacher1",
+      "password": "teacher1",
+      "name": "Mr. Johnson",
+      "role": "teacher",
+      "school": "Springfield High",
+      "createdAt": "2026-01-15T00:00:00.000Z"
+    }
+  ]
+}

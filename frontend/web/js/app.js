@@ -517,15 +517,17 @@ const App = {
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       this._installPrompt = e;
-      btn.style.display = '';
     });
 
     btn.addEventListener('click', async () => {
-      if (!this._installPrompt) return;
-      this._installPrompt.prompt();
-      const result = await this._installPrompt.userChoice;
-      if (result.outcome === 'accepted') btn.style.display = 'none';
-      this._installPrompt = null;
+      if (this._installPrompt) {
+        this._installPrompt.prompt();
+        const result = await this._installPrompt.userChoice;
+        if (result.outcome === 'accepted') btn.style.display = 'none';
+        this._installPrompt = null;
+        return;
+      }
+      showToast('Install App', 'Open browser menu → "Add to Home Screen" or "Install"', 'info');
     });
 
     window.addEventListener('appinstalled', () => {
