@@ -77,6 +77,8 @@ const App = {
     document.getElementById('export-pdf-btn').addEventListener('click', () => this.exportPDF());
     document.getElementById('reset-data-btn').addEventListener('click', () => this.resetData());
 
+    this._initWeekend();
+
     document.getElementById('modal-close').addEventListener('click', () => this.closeModal());
     document.getElementById('modal-edit-btn').addEventListener('click', () => this.editFromModal());
     document.getElementById('modal-delete-btn').addEventListener('click', () => this.deleteFromModal());
@@ -96,6 +98,7 @@ const App = {
       if (e.key === 'w' || e.key === 'W') this.switchView('week');
       if (e.key === 'a' || e.key === 'A') { this.switchView('add'); this.clearForm(); }
       if (e.key === 's' || e.key === 'S') this.switchView('settings');
+      if (e.key === 'e' || e.key === 'E') this.switchView('weekend');
     });
 
     this.renderHome();
@@ -148,6 +151,7 @@ const App = {
     if (target) target.classList.add('active');
     if (view === 'home') this.renderHome();
     if (view === 'week') this.renderWeekGrid();
+    if (view === 'weekend') this._renderWeekend();
   },
 
   updateHeader() {
@@ -436,7 +440,77 @@ const App = {
     showToast('Reset', 'Demo data restored', 'info');
   },
 
+  // ====== WEEKEND ======
+  _weekendDay: 'Sat',
+
+  _initWeekend() {
+    document.querySelectorAll('.weekend-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        this._weekendDay = tab.dataset.day;
+        document.querySelectorAll('.weekend-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        this._renderWeekend();
+      });
+    });
+    document.getElementById('weekend-add-btn').addEventListener('click', () => this._addWeekendActivity());
+    document.getElementById('weekend-activity-name').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') this._addWeekendActivity();
+    });
+    this._renderWeekend();
+  },
+
+  _renderWeekend() {
+    const list = document.getElementById('weekend-activity-list');
+    const activities = Timetable.getWeekend(this._weekendDay);
+    if (!activities.length) {
+      list.innerHTML = '<div class="weekend-empty"><span class="weekend-empty-icon">&#x1F3D4;</span><p>No activities planned</p><span class="text-muted" style="font-size:0.8rem;">Add your first activity above</span></div>';
+      return;
+    }
+    list.innerHTML = activities.map(a => `
+      <div class="weekend-activity">
+        <div class="weekend-activity-color" style="background:${a.color || Timetable.getSubjectColor(a.name)}"></div>
+        <div class="weekend-activity-body">
+          <div class="weekend-activity-name">${a.name}</div>
+          ${a.time ? `<div class="weekend-activity-time">&#x1F552; ${a.time}</div>` : ''}
+          ${a.note ? `<div class="weekend-activity-note">${a.note}</div>` : ''}
+        </div>
+        <button class="weekend-del-btn" data-id="${a.id}">&#x2716;</button>
+      </div>
+    `).join('');
+
+    list.querySelectorAll('.weekend-del-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        Timetable.deleteWeekendActivity(this._weekendDay, btn.dataset.id);
+        this._renderWeekend();
+        showToast('Removed', 'Activity deleted', 'info');
+      });
+    });
+  },
+
+  _addWeekendActivity() {
+    const name = document.getElementById('weekend-activity-name').value.trim();
+    const time = document.getElementById('weekend-activity-time').value;
+    const note = document.getElementById('weekend-activity-note').value.trim();
+    const errorEl = document.getElementById('weekend-error');
+    if (!name) { errorEl.textContent = 'Activity name is required'; return; }
+    errorEl.textContent = '';
+    Timetable.addWeekendActivity(this._weekendDay, {
+      name,
+      time,
+      note,
+      color: Timetable.getSubjectColor(name),
+    });
+    document.getElementById('weekend-activity-name').value = '';
+    document.getElementById('weekend-activity-time').value = '';
+    document.getElementById('weekend-activity-note').value = '';
+    this._renderWeekend();
+    showToast('Added', `"${name}" added to ${this._weekendDay === 'Sat' ? 'Saturday' : 'Sunday'}`, 'info');
+  },
+
   // ====== INSTALL PWA ======
+  _installPrompt: null,
+
+  _initInstall() {
   _installPrompt: null,
 
   _initInstall() {

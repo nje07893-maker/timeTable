@@ -714,6 +714,104 @@ select.setting-input {
 
 hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
 
+/* ===== WEEKEND ===== */
+.weekend-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.weekend-tab {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all var(--transition);
+  text-align: center;
+}
+
+.weekend-tab.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.weekend-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-secondary);
+}
+
+.weekend-empty-icon { font-size: 2.5rem; display: block; margin-bottom: 10px; }
+
+.weekend-activity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  box-shadow: var(--shadow);
+  transition: transform var(--transition);
+}
+
+.weekend-activity:hover { transform: translateY(-1px); }
+
+.weekend-activity-color {
+  width: 4px;
+  height: 40px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.weekend-activity-body { flex: 1; min-width: 0; }
+
+.weekend-activity-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.weekend-activity-time {
+  font-size: 0.75rem;
+  color: var(--primary);
+  margin-top: 2px;
+}
+
+.weekend-activity-note {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.weekend-del-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+
+.weekend-del-btn:hover { background: var(--danger-bg); color: var(--danger); }
+
 /* ===== HIDDEN HELPER ===== */
 .hidden { display: none !important; }
 

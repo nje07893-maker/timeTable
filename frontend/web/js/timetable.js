@@ -216,12 +216,44 @@ const Timetable = {
       'BIBLE': '#607D8B',
     };
     if (colors[subject.toUpperCase()]) return colors[subject.toUpperCase()];
-    // Generate consistent color from subject name
     let hash = 0;
     for (let i = 0; i < subject.length; i++) {
       hash = subject.charCodeAt(i) + ((hash << 5) - hash);
     }
     const h = Math.abs(hash) % 360;
     return `hsl(${h}, 65%, 55%)`;
+  },
+
+  // ====== WEEKEND ACTIVITIES ======
+  _weekendKey: 'timetable_weekend',
+
+  getWeekend(day) {
+    const all = this._loadWeekend();
+    return all[day] || [];
+  },
+
+  addWeekendActivity(day, activity) {
+    const all = this._loadWeekend();
+    if (!all[day]) all[day] = [];
+    activity.id = 'we_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+    all[day].push(activity);
+    this._saveWeekend(all);
+    return activity;
+  },
+
+  deleteWeekendActivity(day, id) {
+    const all = this._loadWeekend();
+    if (!all[day]) return;
+    all[day] = all[day].filter(a => a.id !== id);
+    this._saveWeekend(all);
+  },
+
+  _loadWeekend() {
+    try { return JSON.parse(localStorage.getItem(this._weekendKey)) || {}; }
+    catch { return {}; }
+  },
+
+  _saveWeekend(data) {
+    localStorage.setItem(this._weekendKey, JSON.stringify(data));
   }
 };

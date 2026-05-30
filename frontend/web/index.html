@@ -44,6 +44,10 @@
           <span class="nav-icon">&#x2795;</span>
           <span class="nav-label">Add</span>
         </button>
+        <button class="nav-btn" data-view="weekend">
+          <span class="nav-icon">&#x1F3E0;</span>
+          <span class="nav-label">Weekend</span>
+        </button>
         <button class="nav-btn" data-view="settings">
           <span class="nav-icon">&#x2699;&#xFE0F;</span>
           <span class="nav-label">Settings</span>
@@ -321,6 +325,58 @@
           </div>
 
           <button type="button" id="set-save-btn" class="btn-primary btn-block" style="margin-top:4px;">Save Settings</button>
+        </section>
+
+        <!-- ===== WEEKEND VIEW ===== -->
+        <section id="view-weekend" class="view">
+          <div class="view-header">
+            <h2>Weekend Plan</h2>
+            <p class="text-muted" style="font-size:0.85rem;">Plan your Saturday &amp; Sunday activities</p>
+          </div>
+
+          <div class="weekend-tabs">
+            <button class="weekend-tab active" data-day="Sat">Saturday</button>
+            <button class="weekend-tab" data-day="Sun">Sunday</button>
+          </div>
+
+          <div class="weekend-day-view" id="weekend-day-view">
+            <div id="weekend-activity-list"></div>
+          </div>
+
+          <div class="settings-card" style="margin-top:12px;">
+            <div class="settings-card-header">
+              <span class="settings-icon">&#x2795;</span>
+              <div>
+                <h3>Add Activity</h3>
+                <p class="settings-card-desc">Add a new activity to your weekend</p>
+              </div>
+            </div>
+            <div class="settings-card-body">
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span class="setting-label-text">Activity</span>
+                  <span class="setting-label-hint">What do you want to do?</span>
+                </div>
+                <input type="text" id="weekend-activity-name" placeholder="e.g. Swimming, Reading" class="setting-input setting-input--short">
+              </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span class="setting-label-text">Time</span>
+                  <span class="setting-label-hint">Optional start time</span>
+                </div>
+                <input type="time" id="weekend-activity-time" class="setting-input setting-input--short">
+              </div>
+              <div class="setting-row">
+                <div class="setting-label">
+                  <span class="setting-label-text">Note</span>
+                  <span class="setting-label-hint">Optional details</span>
+                </div>
+                <input type="text" id="weekend-activity-note" placeholder="Any notes" class="setting-input setting-input--short">
+              </div>
+              <div id="weekend-error" class="error-msg"></div>
+              <button type="button" id="weekend-add-btn" class="btn-primary btn-block" style="margin-top:4px;">Add Activity</button>
+            </div>
+          </div>
         </section>
       </main>
 
