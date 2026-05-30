@@ -812,6 +812,19 @@ hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
 
 .weekend-del-btn:hover { background: var(--danger-bg); color: var(--danger); }
 
+/* ===== RESPONSIVE NAV OVERFLOW ===== */
+#bottom-nav {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  justify-content: flex-start;
+  gap: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+#bottom-nav::-webkit-scrollbar { display: none; }
+.nav-btn { flex-shrink: 0; min-width: 56px; }
+
 /* ===== HIDDEN HELPER ===== */
 .hidden { display: none !important; }
 
@@ -848,6 +861,39 @@ hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
   .day-schedule-slot .slot-badge { min-width: 40px; font-size: 0.7rem; padding: 2px 6px; }
   .period-cell { font-size: 0.6rem; min-height: 32px; }
   #week-grid td { min-width: 60px; height: 38px; }
+  .settings-section { padding: 14px; }
+  .setting-row { flex-direction: column; gap: 4px; }
+  .weekend-activity { padding: 10px; gap: 8px; flex-wrap: wrap; }
+  .weekend-activity-body { flex: 0 0 100%; order: -1; }
+  .nav-btn { padding: 6px 8px; font-size: 0.7rem; }
+  .nav-btn .nav-icon { font-size: 1.1rem; }
+  .day-tab { padding: 6px 8px; font-size: 0.72rem; min-width: 0; }
+  .form-card { padding: 14px; }
+  .weekend-tabs { gap: 4px; }
+  .weekend-tab { padding: 8px; font-size: 0.78rem; }
+}
+
+/* Medium phones */
+@media (min-width: 375px) and (max-width: 480px) {
+  .settings-section { padding: 16px; }
+  .nav-btn { padding: 6px 10px; }
+  .day-tab { padding: 6px 10px; font-size: 0.75rem; }
+  .weekend-activity { padding: 10px 12px; }
+}
+
+/* Phones landscape */
+@media (min-height: 480px) and (max-height: 640px) {
+  #app { padding-top: 4px; }
+  #header { padding: 6px 0; margin-bottom: 8px; }
+  #header h1 { font-size: 1.1rem; }
+  #live-status { gap: 8px; }
+  .status-card { padding: 10px; min-height: auto; }
+  .countdown { font-size: 1.2rem; }
+  .day-schedule-slot { padding: 6px 10px; }
+  #bottom-nav { padding: 4px 0; }
+  .nav-btn { padding: 4px 8px; }
+  .period-cell { min-height: 28px; }
+  #week-grid td { height: 32px; }
 }
 
 /* Tablets and landscape */
@@ -873,6 +919,15 @@ hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
   .day-tab { flex: none; padding: 8px 20px; }
   .form-card { padding: 24px; }
   .settings-section { padding: 24px; }
+  .weekend-activity { padding: 14px 18px; }
+  .weekend-activity-name { font-size: 1rem; }
+  .weekend-activity-time { font-size: 0.8rem; }
+  .weekend-activity-note { font-size: 0.8rem; }
+  .weekend-tab { padding: 12px; font-size: 0.9rem; }
+  .weekend-tabs { gap: 12px; }
+  .weekend-empty { padding: 60px 40px; }
+  .weekend-empty-icon { font-size: 3rem; }
+  #install-btn .nav-icon { font-size: 1.3rem; }
 }
 
 /* Desktop */
